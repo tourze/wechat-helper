@@ -96,12 +96,12 @@ class Encryptor
     public function encrypt($xml, $nonce = null, $timestamp = null): string
     {
         try {
-            $xml = $this->pkcs7Pad(mb_substr(md5(uniqid()), 0, 16) . pack('N', mb_strlen($xml)) . $xml . $this->appId, $this->blockSize);
+            $xml = $this->pkcs7Pad(substr(md5(uniqid()), 0, 16) . pack('N', strlen($xml)) . $xml . $this->appId, $this->blockSize);
 
             $encrypted = base64_encode(AES::encrypt(
                 $xml,
                 $this->aesKey,
-                mb_substr($this->aesKey, 0, 16),
+                substr($this->aesKey, 0, 16),
                 OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING
             ));
             // @codeCoverageIgnoreStart
@@ -110,7 +110,7 @@ class Encryptor
         }
         // @codeCoverageIgnoreEnd
 
-        null !== $nonce || $nonce = mb_substr($this->appId, 0, 10);
+        null !== $nonce || $nonce = substr($this->appId, 0, 10);
         null !== $timestamp || $timestamp = time();
 
         $response = [
@@ -143,18 +143,18 @@ class Encryptor
         $decrypted = AES::decrypt(
             base64_decode($content, true),
             $this->aesKey,
-            mb_substr($this->aesKey, 0, 16),
+            substr($this->aesKey, 0, 16),
             OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING
         );
         $result = $this->pkcs7Unpad($decrypted);
-        $content = mb_substr($result, 16, mb_strlen($result));
-        $contentLen = unpack('N', mb_substr($content, 0, 4))[1];
+        $content = substr($result, 16, strlen($result));
+        $contentLen = unpack('N', substr($content, 0, 4))[1];
 
-        if (trim(mb_substr($content, $contentLen + 4)) !== $this->appId) {
+        if (trim(substr($content, $contentLen + 4)) !== $this->appId) {
             throw new \RuntimeException('Invalid appId.', self::ERROR_INVALID_APP_ID);
         }
 
-        return mb_substr($content, 4, $contentLen);
+        return substr($content, 4, $contentLen);
     }
 
     /**
@@ -176,7 +176,7 @@ class Encryptor
         if ($blockSize > 256) {
             throw new \RuntimeException('$blockSize may not be more than 256');
         }
-        $padding = $blockSize - (mb_strlen($text) % $blockSize);
+        $padding = $blockSize - (strlen($text) % $blockSize);
         $pattern = chr($padding);
 
         return $text . str_repeat($pattern, $padding);
@@ -187,12 +187,12 @@ class Encryptor
      */
     public function pkcs7Unpad(string $text): string
     {
-        $pad = ord(mb_substr($text, -1));
+        $pad = ord(substr($text, -1));
         if ($pad < 1 || $pad > $this->blockSize) {
             $pad = 0;
         }
 
-        return mb_substr($text, 0, mb_strlen($text) - $pad);
+        return substr($text, 0, strlen($text) - $pad);
     }
 
     /**
