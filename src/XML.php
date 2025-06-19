@@ -29,7 +29,7 @@ class XML
 
         $result = self::normalize(simplexml_load_string(self::sanitize($xml), 'SimpleXMLElement', LIBXML_COMPACT | LIBXML_NOCDATA | LIBXML_NOBLANKS));
 
-        PHP_MAJOR_VERSION < 8 && libxml_disable_entity_loader($backup);
+        PHP_MAJOR_VERSION < 8 && (bool) libxml_disable_entity_loader($backup);
 
         return $result;
     }
@@ -66,7 +66,7 @@ class XML
         $attr = '',
         $id = 'id',
     ) {
-        if (is_array($attr)) {
+        if ((bool) is_array($attr)) {
             $_attr = [];
 
             foreach ($attr as $key => $value) {
@@ -108,11 +108,11 @@ class XML
     {
         $result = null;
 
-        if (is_object($obj)) {
+        if ((bool) is_object($obj)) {
             $obj = (array) $obj;
         }
 
-        if (is_array($obj)) {
+        if ((bool) is_array($obj)) {
             foreach ($obj as $key => $value) {
                 $res = self::normalize($value);
                 if (('@attributes' === $key) && $key) {
@@ -142,14 +142,14 @@ class XML
         $xml = $attr = '';
 
         foreach ($data as $key => $val) {
-            if (is_numeric($key)) {
-                $id && $attr = " {$id}=\"{$key}\"";
+            if ((bool) is_numeric($key)) {
+                $id && (bool) $attr = " {$id}=\"{$key}\"";
                 $key = $item;
             }
 
             $xml .= "<{$key}{$attr}>";
 
-            if (is_array($val) || is_object($val)) {
+            if ((bool) is_array($val) || is_object($val)) {
                 $xml .= self::data2Xml((array) $val, $item, $id);
             } else {
                 $xml .= is_numeric($val) ? $val : self::cdata($val);

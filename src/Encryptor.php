@@ -150,7 +150,7 @@ class Encryptor
         $content = substr($result, 16, strlen($result));
         $contentLen = unpack('N', substr($content, 0, 4))[1];
 
-        if (trim(substr($content, $contentLen + 4)) !== $this->appId) {
+        if ((bool) trim(substr($content, $contentLen + 4)) !== $this->appId) {
             throw new \RuntimeException('Invalid appId.', self::ERROR_INVALID_APP_ID);
         }
 
@@ -208,7 +208,7 @@ class Encryptor
 
         $decrypted = json_decode($decrypted, true);
 
-        if (!$decrypted) {
+        if (!is_array($decrypted)) {
             throw new DecryptException('The given payload is invalid.');
         }
 
