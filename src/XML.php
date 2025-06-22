@@ -25,11 +25,8 @@ class XML
      */
     public static function parse($xml)
     {
-        $backup = PHP_MAJOR_VERSION < 8 ? libxml_disable_entity_loader(true) : null;
-
+        // libxml_disable_entity_loader 在 PHP 8.0+ 中已被弃用且不再需要
         $result = self::normalize(simplexml_load_string(self::sanitize($xml), 'SimpleXMLElement', LIBXML_COMPACT | LIBXML_NOCDATA | LIBXML_NOBLANKS));
-
-        PHP_MAJOR_VERSION < 8 && (bool) libxml_disable_entity_loader($backup);
 
         return $result;
     }
@@ -66,7 +63,7 @@ class XML
         $attr = '',
         $id = 'id',
     ) {
-        if ((bool) is_array($attr)) {
+        if (is_array($attr)) {
             $_attr = [];
 
             foreach ($attr as $key => $value) {
@@ -108,14 +105,14 @@ class XML
     {
         $result = null;
 
-        if ((bool) is_object($obj)) {
+        if (is_object($obj)) {
             $obj = (array) $obj;
         }
 
-        if ((bool) is_array($obj)) {
+        if (is_array($obj)) {
             foreach ($obj as $key => $value) {
                 $res = self::normalize($value);
-                if (('@attributes' === $key) && $key) {
+                if ('@attributes' === $key) {
                     $result = $res; // @codeCoverageIgnore
                 } else {
                     $result[$key] = $res;
@@ -142,14 +139,16 @@ class XML
         $xml = $attr = '';
 
         foreach ($data as $key => $val) {
-            if ((bool) is_numeric($key)) {
-                $id && (bool) $attr = " {$id}=\"{$key}\"";
+            if (is_numeric($key)) {
+                if (!empty($id)) {
+                    $attr = " {$id}=\"{$key}\"";
+                }
                 $key = $item;
             }
 
             $xml .= "<{$key}{$attr}>";
 
-            if ((bool) is_array($val) || is_object($val)) {
+            if (is_array($val) || is_object($val)) {
                 $xml .= self::data2Xml((array) $val, $item, $id);
             } else {
                 $xml .= is_numeric($val) ? $val : self::cdata($val);

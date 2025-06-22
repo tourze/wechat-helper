@@ -157,7 +157,7 @@ class XMLTest extends TestCase
         ];
 
         $attr = ['version' => '1.0', 'encoding' => 'UTF-8'];
-        $xml = XML::build($array, 'xml', 'item', $attr);
+        $xml = XML::build($array, 'xml', 'item', implode(' ', array_map(fn($k, $v) => "{$k}=\"{$v}\"", array_keys($attr), array_values($attr))));
 
         $this->assertStringContainsString('<xml version="1.0" encoding="UTF-8">', $xml);
     }

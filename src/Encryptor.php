@@ -110,8 +110,12 @@ class Encryptor
         }
         // @codeCoverageIgnoreEnd
 
-        null !== $nonce || $nonce = substr($this->appId, 0, 10);
-        null !== $timestamp || $timestamp = time();
+        if (null === $nonce) {
+            $nonce = substr($this->appId, 0, 10);
+        }
+        if (null === $timestamp) {
+            $timestamp = time();
+        }
 
         $response = [
             'Encrypt' => $encrypted,
