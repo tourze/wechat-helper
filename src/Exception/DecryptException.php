@@ -9,12 +9,12 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Tourze\WechatHelper;
+namespace Tourze\WechatHelper\Exception;
 
 use Exception as BaseException;
 
 /**
- * Class Exception.
+ * Class DecryptException.
  *
  * @author overtrue <i@overtrue.me>
  */

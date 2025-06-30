@@ -11,6 +11,9 @@
 
 namespace Tourze\WechatHelper;
 
+use Tourze\WechatHelper\Exception\InvalidIvException;
+use Tourze\WechatHelper\Exception\InvalidKeyException;
+
 /**
  * Class AES.
  *
@@ -34,7 +37,7 @@ class AES
         self::validateKey($key);
         self::validateIv($iv);
 
-        return openssl_decrypt($cipherText, $method ?: self::getMode($key), $key, $option, $iv);
+        return openssl_decrypt($cipherText, $method !== null ? $method : self::getMode($key), $key, $option, $iv);
     }
 
     /**
@@ -50,7 +53,7 @@ class AES
     public static function validateKey(string $key)
     {
         if (!in_array(strlen($key), [16, 24, 32], true)) {
-            throw new \InvalidArgumentException(sprintf('Key length must be 16, 24, or 32 bytes; got key len (%s).', strlen($key)));
+            throw new InvalidKeyException(sprintf('Key length must be 16, 24, or 32 bytes; got key len (%s).', strlen($key)));
         }
     }
 
@@ -60,7 +63,7 @@ class AES
     public static function validateIv(string $iv)
     {
         if (!empty($iv) && 16 !== strlen($iv)) {
-            throw new \InvalidArgumentException('IV length must be 16 bytes.');
+            throw new InvalidIvException('IV length must be 16 bytes.');
         }
     }
 }

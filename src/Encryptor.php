@@ -11,6 +11,12 @@
 
 namespace Tourze\WechatHelper;
 
+use Tourze\WechatHelper\Exception\DecryptException;
+use Tourze\WechatHelper\Exception\EncryptionException;
+use Tourze\WechatHelper\Exception\InvalidAppIdException;
+use Tourze\WechatHelper\Exception\InvalidBlockSizeException;
+use Tourze\WechatHelper\Exception\InvalidSignatureException;
+
 /**
  * Class Encryptor.
  *
@@ -81,7 +87,7 @@ class Encryptor
     /**
      * Get the app token.
      */
-    public function getToken(): string
+    public function getToken(): ?string
     {
         return $this->token;
     }
@@ -106,7 +112,7 @@ class Encryptor
             ));
             // @codeCoverageIgnoreStart
         } catch (\Throwable $e) {
-            throw new \RuntimeException($e->getMessage(), self::ERROR_ENCRYPT_AES);
+            throw new EncryptionException($e->getMessage(), self::ERROR_ENCRYPT_AES);
         }
         // @codeCoverageIgnoreEnd
 
@@ -141,7 +147,7 @@ class Encryptor
         $signature = $this->signature($this->token, $timestamp, $nonce, $content);
 
         if ($signature !== $msgSignature) {
-            throw new \RuntimeException('Invalid Signature.', self::ERROR_INVALID_SIGNATURE);
+            throw new InvalidSignatureException('Invalid Signature.', self::ERROR_INVALID_SIGNATURE);
         }
 
         $decrypted = AES::decrypt(
@@ -155,7 +161,7 @@ class Encryptor
         $contentLen = unpack('N', substr($content, 0, 4))[1];
 
         if ((bool) trim(substr($content, $contentLen + 4)) !== $this->appId) {
-            throw new \RuntimeException('Invalid appId.', self::ERROR_INVALID_APP_ID);
+            throw new InvalidAppIdException('Invalid appId.', self::ERROR_INVALID_APP_ID);
         }
 
         return substr($content, 4, $contentLen);
@@ -178,7 +184,7 @@ class Encryptor
     public function pkcs7Pad(string $text, int $blockSize): string
     {
         if ($blockSize > 256) {
-            throw new \RuntimeException('$blockSize may not be more than 256');
+            throw new InvalidBlockSizeException('$blockSize may not be more than 256');
         }
         $padding = $blockSize - (strlen($text) % $blockSize);
         $pattern = chr($padding);

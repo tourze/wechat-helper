@@ -1,8 +1,9 @@
 <?php
 
-namespace Tourze\WechatHelper\Tests;
+namespace Tourze\WechatHelper\Tests\Unit;
 
-use InvalidArgumentException;
+use Tourze\WechatHelper\Exception\InvalidIvException;
+use Tourze\WechatHelper\Exception\InvalidKeyException;
 use PHPUnit\Framework\TestCase;
 use Tourze\WechatHelper\AES;
 
@@ -58,7 +59,7 @@ class AESTest extends TestCase
      */
     public function testEncrypt_withInvalidKeyLength()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidKeyException::class);
         $this->expectExceptionMessage('Key length must be 16, 24, or 32 bytes');
 
         $text = 'Hello World';
@@ -89,7 +90,7 @@ class AESTest extends TestCase
      */
     public function testDecrypt_withInvalidIvLength()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidIvException::class);
         $this->expectExceptionMessage('IV length must be 16 bytes');
 
         $encrypted = 'dummy-encrypted-text';
@@ -133,7 +134,7 @@ class AESTest extends TestCase
      */
     public function testValidateKey_withInvalidKey()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidKeyException::class);
         $this->expectExceptionMessage('Key length must be 16, 24, or 32 bytes');
 
         $invalidKey = str_repeat('a', 10);
@@ -156,7 +157,7 @@ class AESTest extends TestCase
      */
     public function testValidateIv_withInvalidIv()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidIvException::class);
         $this->expectExceptionMessage('IV length must be 16 bytes');
 
         $invalidIv = str_repeat('a', 10);

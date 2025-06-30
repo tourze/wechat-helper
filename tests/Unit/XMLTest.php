@@ -1,6 +1,6 @@
 <?php
 
-namespace Tourze\WechatHelper\Tests;
+namespace Tourze\WechatHelper\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use Tourze\WechatHelper\XML;
