@@ -11,8 +11,9 @@
 
 namespace Tourze\WechatHelper\Exception;
 
-use InvalidArgumentException;
-
-class InvalidKeyException extends InvalidArgumentException
+/**
+ * 无效密钥异常类。
+ */
+class InvalidKeyException extends \InvalidArgumentException
 {
 }

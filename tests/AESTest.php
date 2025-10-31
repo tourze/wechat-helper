@@ -1,18 +1,23 @@
 <?php
 
-namespace Tourze\WechatHelper\Tests\Unit;
+namespace Tourze\WechatHelper\Tests;
 
-use Tourze\WechatHelper\Exception\InvalidIvException;
-use Tourze\WechatHelper\Exception\InvalidKeyException;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Tourze\WechatHelper\AES;
+use Tourze\WechatHelper\Exception\InvalidIvException;
+use Tourze\WechatHelper\Exception\InvalidKeyException;
 
-class AESTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(AES::class)]
+final class AESTest extends TestCase
 {
     /**
      * 测试使用16字节密钥的加密功能
      */
-    public function testEncrypt_withValidKey16Bytes()
+    public function testEncryptWithValidKey16Bytes(): void
     {
         $text = 'Hello World';
         $key = str_repeat('a', 16);
@@ -27,7 +32,7 @@ class AESTest extends TestCase
     /**
      * 测试使用24字节密钥的加密功能
      */
-    public function testEncrypt_withValidKey24Bytes()
+    public function testEncryptWithValidKey24Bytes(): void
     {
         $text = 'Hello World';
         $key = str_repeat('a', 24);
@@ -42,7 +47,7 @@ class AESTest extends TestCase
     /**
      * 测试使用32字节密钥的加密功能
      */
-    public function testEncrypt_withValidKey32Bytes()
+    public function testEncryptWithValidKey32Bytes(): void
     {
         $text = 'Hello World';
         $key = str_repeat('a', 32);
@@ -57,7 +62,7 @@ class AESTest extends TestCase
     /**
      * 测试使用无效长度密钥时抛出的异常
      */
-    public function testEncrypt_withInvalidKeyLength()
+    public function testEncryptWithInvalidKeyLength(): void
     {
         $this->expectException(InvalidKeyException::class);
         $this->expectExceptionMessage('Key length must be 16, 24, or 32 bytes');
@@ -72,7 +77,7 @@ class AESTest extends TestCase
     /**
      * 测试使用自定义解密方法
      */
-    public function testDecrypt_withCustomMethod()
+    public function testDecryptWithCustomMethod(): void
     {
         $text = 'Hello World';
         $key = str_repeat('a', 16);
@@ -80,6 +85,7 @@ class AESTest extends TestCase
         $method = 'aes-128-cbc';
 
         $encrypted = openssl_encrypt($text, $method, $key, OPENSSL_RAW_DATA, $iv);
+        $this->assertIsString($encrypted);
         $decrypted = AES::decrypt($encrypted, $key, $iv, OPENSSL_RAW_DATA, $method);
 
         $this->assertEquals($text, $decrypted);
@@ -88,7 +94,7 @@ class AESTest extends TestCase
     /**
      * 测试使用无效IV长度时抛出的异常
      */
-    public function testDecrypt_withInvalidIvLength()
+    public function testDecryptWithInvalidIvLength(): void
     {
         $this->expectException(InvalidIvException::class);
         $this->expectExceptionMessage('IV length must be 16 bytes');
@@ -103,7 +109,7 @@ class AESTest extends TestCase
     /**
      * 测试getMode方法返回正确的加密模式
      */
-    public function testGetMode_returnsCorrectMode()
+    public function testGetModeReturnsCorrectMode(): void
     {
         $key16 = str_repeat('a', 16);
         $key24 = str_repeat('a', 24);
@@ -117,22 +123,23 @@ class AESTest extends TestCase
     /**
      * 测试有效密钥验证
      */
-    public function testValidateKey_withValidKey()
+    public function testValidateKeyWithValidKey(): void
     {
         $key16 = str_repeat('a', 16);
         $key24 = str_repeat('a', 24);
         $key32 = str_repeat('a', 32);
 
         // 如果没有抛出异常，则测试通过
-        $this->assertNull(AES::validateKey($key16));
-        $this->assertNull(AES::validateKey($key24));
-        $this->assertNull(AES::validateKey($key32));
+        AES::validateKey($key16);
+        AES::validateKey($key24);
+        AES::validateKey($key32);
+        $this->assertTrue(true); // 测试通过
     }
 
     /**
      * 测试无效密钥验证抛出异常
      */
-    public function testValidateKey_withInvalidKey()
+    public function testValidateKeyWithInvalidKey(): void
     {
         $this->expectException(InvalidKeyException::class);
         $this->expectExceptionMessage('Key length must be 16, 24, or 32 bytes');
@@ -144,18 +151,19 @@ class AESTest extends TestCase
     /**
      * 测试有效IV验证
      */
-    public function testValidateIv_withValidIv()
+    public function testValidateIvWithValidIv(): void
     {
         $iv = str_repeat('a', 16);
 
         // 如果没有抛出异常，则测试通过
-        $this->assertNull(AES::validateIv($iv));
+        AES::validateIv($iv);
+        $this->assertTrue(true); // 测试通过
     }
 
     /**
      * 测试无效IV验证抛出异常
      */
-    public function testValidateIv_withInvalidIv()
+    public function testValidateIvWithInvalidIv(): void
     {
         $this->expectException(InvalidIvException::class);
         $this->expectExceptionMessage('IV length must be 16 bytes');
@@ -167,9 +175,10 @@ class AESTest extends TestCase
     /**
      * 测试空IV
      */
-    public function testValidateIv_withEmptyIv()
+    public function testValidateIvWithEmptyIv(): void
     {
         // 空IV应该是有效的
-        $this->assertNull(AES::validateIv(''));
+        AES::validateIv('');
+        $this->assertTrue(true); // 测试通过
     }
 }

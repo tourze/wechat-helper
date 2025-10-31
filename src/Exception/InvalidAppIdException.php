@@ -11,8 +11,9 @@
 
 namespace Tourze\WechatHelper\Exception;
 
-use RuntimeException;
-
-class InvalidAppIdException extends RuntimeException
+/**
+ * 无效应用ID异常类。
+ */
+class InvalidAppIdException extends \RuntimeException
 {
 }

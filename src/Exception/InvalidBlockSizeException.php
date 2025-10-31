@@ -11,8 +11,9 @@
 
 namespace Tourze\WechatHelper\Exception;
 
-use RuntimeException;
-
-class InvalidBlockSizeException extends RuntimeException
+/**
+ * 无效块大小异常类。
+ */
+class InvalidBlockSizeException extends \RuntimeException
 {
 }

@@ -56,7 +56,7 @@ class Encryptor
     protected $appId;
 
     /**
-     * App token.
+     * 应用令牌。
      *
      * @var string
      */
@@ -68,7 +68,7 @@ class Encryptor
     protected $aesKey;
 
     /**
-     * Block size.
+     * 块大小。
      *
      * @var int
      */
@@ -80,12 +80,16 @@ class Encryptor
     public function __construct(string $appId, ?string $token = null, ?string $aesKey = null)
     {
         $this->appId = $appId;
-        $this->token = $token;
-        $this->aesKey = base64_decode($aesKey . '=', true);
+        $this->token = $token ?? '';
+        $aesKeyDecoded = base64_decode($aesKey . '=', true);
+        if (false === $aesKeyDecoded) {
+            throw new \InvalidArgumentException('Invalid AES key');
+        }
+        $this->aesKey = $aesKeyDecoded;
     }
 
     /**
-     * Get the app token.
+     * 获取应用令牌。
      */
     public function getToken(): ?string
     {
@@ -93,13 +97,9 @@ class Encryptor
     }
 
     /**
-     * Encrypt the message and return XML.
-     *
-     * @param string $xml
-     * @param string $nonce
-     * @param int    $timestamp
+     * 加密消息并返回 XML。
      */
-    public function encrypt($xml, $nonce = null, $timestamp = null): string
+    public function encrypt(string $xml, ?string $nonce = null, ?int $timestamp = null): string
     {
         try {
             $xml = $this->pkcs7Pad(substr(md5(uniqid()), 0, 16) . pack('N', strlen($xml)) . $xml . $this->appId, $this->blockSize);
@@ -135,14 +135,9 @@ class Encryptor
     }
 
     /**
-     * Decrypt message.
-     *
-     * @param string $content
-     * @param string $msgSignature
-     * @param string $nonce
-     * @param string $timestamp
+     * 解密消息。
      */
-    public function decrypt($content, $msgSignature, $nonce, $timestamp): string
+    public function decrypt(string $content, string $msgSignature, string $nonce, string $timestamp): string
     {
         $signature = $this->signature($this->token, $timestamp, $nonce, $content);
 
@@ -150,17 +145,28 @@ class Encryptor
             throw new InvalidSignatureException('Invalid Signature.', self::ERROR_INVALID_SIGNATURE);
         }
 
+        $contentDecoded = base64_decode($content, true);
+        if (false === $contentDecoded) {
+            throw new DecryptException('Invalid base64 content');
+        }
         $decrypted = AES::decrypt(
-            base64_decode($content, true),
+            $contentDecoded,
             $this->aesKey,
             substr($this->aesKey, 0, 16),
             OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING
         );
         $result = $this->pkcs7Unpad($decrypted);
         $content = substr($result, 16, strlen($result));
-        $contentLen = unpack('N', substr($content, 0, 4))[1];
+        $unpackResult = unpack('N', substr($content, 0, 4));
+        if (false === $unpackResult) {
+            throw new DecryptException('Failed to unpack content length');
+        }
+        $contentLen = $unpackResult[1];
 
-        if ((bool) trim(substr($content, $contentLen + 4)) !== $this->appId) {
+        if (!is_int($contentLen)) {
+            throw new DecryptException('Invalid content length', self::ERROR_DECRYPT_AES);
+        }
+        if (trim(substr($content, $contentLen + 4)) !== $this->appId) {
             throw new InvalidAppIdException('Invalid appId.', self::ERROR_INVALID_APP_ID);
         }
 
@@ -168,7 +174,7 @@ class Encryptor
     }
 
     /**
-     * Get SHA1.
+     * 获取 SHA1 签名。
      */
     public function signature(): string
     {
@@ -193,7 +199,7 @@ class Encryptor
     }
 
     /**
-     * PKCS#7 unpad.
+     * PKCS#7 去填充。
      */
     public function pkcs7Unpad(string $text): string
     {
@@ -206,22 +212,38 @@ class Encryptor
     }
 
     /**
-     * Decrypt data.
+     * 解密数据。
+     *
+     * @return array<string, mixed>
      */
     public function decryptData(string $sessionKey, string $iv, string $encrypted): array
     {
+        $encryptedDecoded = base64_decode($encrypted, true);
+        $sessionKeyDecoded = base64_decode($sessionKey, true);
+        $ivDecoded = base64_decode($iv, true);
+
+        if (false === $encryptedDecoded || false === $sessionKeyDecoded || false === $ivDecoded) {
+            throw new DecryptException('Invalid base64 data');
+        }
+
         $decrypted = AES::decrypt(
-            base64_decode($encrypted, false),
-            base64_decode($sessionKey, false),
-            base64_decode($iv, false)
+            $encryptedDecoded,
+            $sessionKeyDecoded,
+            $ivDecoded
         );
 
-        $decrypted = json_decode($decrypted, true);
+        $decodedData = json_decode($decrypted, true);
 
-        if (!is_array($decrypted)) {
+        if (!is_array($decodedData)) {
             throw new DecryptException('The given payload is invalid.');
         }
 
-        return $decrypted;
+        // Ensure we return array<string, mixed>
+        $result = [];
+        foreach ($decodedData as $key => $value) {
+            $result[(string) $key] = $value;
+        }
+
+        return $result;
     }
 }

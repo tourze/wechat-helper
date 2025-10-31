@@ -11,8 +11,9 @@
 
 namespace Tourze\WechatHelper\Exception;
 
-use InvalidArgumentException;
-
-class InvalidIvException extends InvalidArgumentException
+/**
+ * 无效初始化向量异常类。
+ */
+class InvalidIvException extends \InvalidArgumentException
 {
 }

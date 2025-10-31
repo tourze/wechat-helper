@@ -1,17 +1,22 @@
 {
   "name": "tourze/wechat-helper",
-  "description": "微信助手方法",
+  "description": "微信消息加密解密和XML处理助手工具包",
   "type": "library",
   "license": "MIT",
   "require": {
-    "php": "^8.1",
+    "ext-json": "*",
     "ext-libxml": "*",
     "ext-openssl": "*",
-    "ext-simplexml": "*"
+    "ext-simplexml": "*",
+    "symfony/dependency-injection": "^7.3",
+    "symfony/framework-bundle": "^7.3",
+    "symfony/yaml": "^7.3"
   },
   "require-dev": {
     "phpstan/phpstan": "^2.1",
-    "phpunit/phpunit": "^10.0"
+    "phpunit/phpunit": "^11.5",
+    "tourze/phpunit-base": "1.*",
+    "tourze/symfony-testing-framework": "0.0.*"
   },
   "autoload": {
     "psr-4": {

@@ -11,8 +11,9 @@
 
 namespace Tourze\WechatHelper\Exception;
 
-use RuntimeException;
-
-class InvalidSignatureException extends RuntimeException
+/**
+ * 无效签名异常类。
+ */
+class InvalidSignatureException extends \RuntimeException
 {
 }

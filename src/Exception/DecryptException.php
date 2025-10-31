@@ -14,7 +14,7 @@ namespace Tourze\WechatHelper\Exception;
 use Exception as BaseException;
 
 /**
- * Class DecryptException.
+ * 解密异常类。
  *
  * @author overtrue <i@overtrue.me>
  */

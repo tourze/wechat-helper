@@ -11,8 +11,9 @@
 
 namespace Tourze\WechatHelper\Exception;
 
-use RuntimeException;
-
-class EncryptionException extends RuntimeException
+/**
+ * 加密异常类。
+ */
+class EncryptionException extends \RuntimeException
 {
 }

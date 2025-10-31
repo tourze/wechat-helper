@@ -26,18 +26,28 @@ class AES
         self::validateKey($key);
         self::validateIv($iv);
 
-        return openssl_encrypt($text, self::getMode($key), $key, $option, $iv);
+        $result = openssl_encrypt($text, self::getMode($key), $key, $option, $iv);
+        if (false === $result) {
+            throw new \RuntimeException('Encryption failed');
+        }
+
+        return $result;
     }
 
     /**
      * @param string|null $method
      */
-    public static function decrypt(string $cipherText, string $key, string $iv, int $option = OPENSSL_RAW_DATA, $method = null): string
+    public static function decrypt(string $cipherText, string $key, string $iv, int $option = OPENSSL_RAW_DATA, ?string $method = null): string
     {
         self::validateKey($key);
         self::validateIv($iv);
 
-        return openssl_decrypt($cipherText, $method !== null ? $method : self::getMode($key), $key, $option, $iv);
+        $result = openssl_decrypt($cipherText, null !== $method ? $method : self::getMode($key), $key, $option, $iv);
+        if (false === $result) {
+            throw new \RuntimeException('Decryption failed');
+        }
+
+        return $result;
     }
 
     /**
@@ -50,7 +60,7 @@ class AES
         return 'aes-' . (8 * strlen($key)) . '-cbc';
     }
 
-    public static function validateKey(string $key)
+    public static function validateKey(string $key): void
     {
         if (!in_array(strlen($key), [16, 24, 32], true)) {
             throw new InvalidKeyException(sprintf('Key length must be 16, 24, or 32 bytes; got key len (%s).', strlen($key)));
@@ -60,9 +70,9 @@ class AES
     /**
      * @throws \InvalidArgumentException
      */
-    public static function validateIv(string $iv)
+    public static function validateIv(string $iv): void
     {
-        if (!empty($iv) && 16 !== strlen($iv)) {
+        if ('' !== $iv && 16 !== strlen($iv)) {
             throw new InvalidIvException('IV length must be 16 bytes.');
         }
     }
