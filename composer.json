@@ -9,7 +9,7 @@
     "ext-openssl": "*",
     "ext-simplexml": "*",
     "symfony/dependency-injection": "^7.3",
-    "symfony/framework-bundle": "^7.3",
+    "symfony/framework-bundle": "^7.4",
     "symfony/yaml": "^7.3"
   },
   "require-dev": {
